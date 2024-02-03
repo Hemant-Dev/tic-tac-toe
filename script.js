@@ -3,41 +3,22 @@ const gameBoard = (
     function () {
         let board = [['', '', ''], ['', '', ''], ['', '', '']];
 
-        function startGame() {
-            console.log(`Starting Game!`);
-        }
+        const startGame = () => console.log(`Starting Game!`);
 
-        function setX(row, col) {
-            if (board[row][col] === 'X' || board[row][col] === 'O') {
-                console.log(`Position already equipped!`);
-            } else {
-                board[row][col] = 'X';
-            }
-            this.checkWinner();
-            this.renderBoard();
-        }
+        const getBoard = () => board;
 
-        function setO(row, col) {
-            if (board[row][col] === 'X' || board[row][col] === 'O') {
-                console.log(`Position already equipped!`);
-            } else {
-                board[row][col] = 'O';
-            }
-            this.checkWinner();
-            this.renderBoard();
-        }
+        const renderBoard = () => printBoard();
 
-        function renderBoard() {
-            printBoard();
-        }
         function resetBoard() {
             board = [['', '', ''], ['', '', ''], ['', '', '']];
             this.renderBoard();
         }
         function printBoard() {
-            for (let row = 0; row < 3; row++) {
-                console.log(board[row]);
-            }
+            // for (let row = 0; row < 3; row++) {
+            //     console.log(board[row]);
+            // }
+            const boardWithValues = board.map((row) => row.map((cell) => cell));
+            console.log(boardWithValues);
         }
 
         function checkWinner() {
@@ -97,7 +78,7 @@ const gameBoard = (
                 return;
             }
 
-            //Resettting x and o count
+            //Resetting x and o count
             countO = 0, countX = 0;
             let rightDiag = [board[0][2], board[1][1], board[2][0]];
             for(let i = 0; i<3; i++){
@@ -115,11 +96,61 @@ const gameBoard = (
                 return;
             }
 
+
         }
 
+        return { startGame, renderBoard, getBoard, checkWinner, resetBoard };
+    }
+)();
 
-        return { startGame, renderBoard, setX, setO, checkWinner, resetBoard };
-    })();
+function GameController
+    (
+        playerOneName = "Player One",
+        playerTwoName = "Player Two"
+    ) {
+    
+        const board = gameBoard.getBoard();
+
+    const players = [
+        {
+            name: playerOneName,
+            value: 'X'
+        },
+        {
+            name: playerTwoName,
+            value: 'O'
+        }
+    ];
+
+    let activePlayer = players[0];
+
+    const switchPlayerTurn = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0];
+    }
+
+    const getActivePlayer = () => activePlayer;
+
+    function playTurn(row, col) {
+
+        console.log(`${getActivePlayer().name}'s turn.`)
+
+        if (board[row][col] === 'X' || board[row][col] === 'O') {
+            console.log(`Position already equipped!`);
+            return;
+        } else {
+            board[row][col] = getActivePlayer().value;
+        }
+
+        switchPlayerTurn();
+        gameBoard.checkWinner();
+        gameBoard.renderBoard();
+    }
+
+    return { playTurn, getActivePlayer, start: gameBoard.startGame }
+
+}
+
+const game = GameController("Hemant", "Aarav");
 
 
 
