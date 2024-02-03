@@ -21,85 +21,21 @@ const gameBoard = (
             console.log(boardWithValues);
         }
 
-        function checkWinner() {
-            //row check
-            for (let row = 0; row < 3; row++) {
-                let countX = 0, countO = 0;
-                for (let col = 0; col < 3; col++) {
-                    if (board[row][col] === 'X')
-                        countX++;
-                    else if (board[row][col] === 'O')
-                        countO++;
-                }
-                if (countX === 3) {
-                    console.log(`Winner is X`);
-                    break;
-                }
-                if (countO === 3) {
-                    console.log(`Winner is O`);
-                    break;
+        function isBoardFull(){
+            const board = getBoard();
+            let count = 0;
+            for(let i=0; i<3; i++){
+                for(let j=0; j<3; j++){
+                    if(board[i][j] !== '')
+                        count++;
                 }
             }
-
-            // col check
-            for (let col = 0; col < 3; col++) {
-                let countX = 0, countO = 0;
-                for (let row = 0; row < 3; row++) {
-                    if (board[row][col] === 'X')
-                        countX++;
-                    else if (board[row][col] === 'O')
-                        countO++;
-                }
-                if (countX === 3) {
-                    console.log(`Winner is X`);
-                    break;
-                }
-                if (countO === 3) {
-                    console.log(`Winner is O`);
-                    break;
-                }
-            }
-
-            // left diag check
-            let countX = 0, countO = 0;
-            let leftDiag = [board[0][0], board[1][1], board[2][2]];
-            for(let i = 0; i<3; i++){
-                if(leftDiag[i] === 'X')
-                    countX++;
-                else if(leftDiag[i] === 'O')
-                    countO++;
-            }
-            if (countX === 3) {
-                console.log(`Winner is X`);
-                return;
-            }
-            if (countO === 3) {
-                console.log(`Winner is O`);
-                return;
-            }
-
-            //Resetting x and o count
-            countO = 0, countX = 0;
-            let rightDiag = [board[0][2], board[1][1], board[2][0]];
-            for(let i = 0; i<3; i++){
-                if(rightDiag[i] === 'X')
-                    countX++;
-                else if(rightDiag[i] === 'O')
-                    countO++;
-            }
-            if (countX === 3) {
-                console.log(`Winner is X`);
-                return;
-            }
-            if (countO === 3) {
-                console.log(`Winner is O`);
-                return;
-            }
-
-
+            return count === 9;
         }
-
-        return { startGame, renderBoard, getBoard, checkWinner, resetBoard };
+        
+        return {
+            startGame, renderBoard, getBoard, resetBoard, isBoardFull
+        };
     }
 )();
 
@@ -108,8 +44,8 @@ function GameController
         playerOneName = "Player One",
         playerTwoName = "Player Two"
     ) {
-    
-        const board = gameBoard.getBoard();
+
+    let board = gameBoard.getBoard();
 
     const players = [
         {
@@ -141,12 +77,64 @@ function GameController
             board[row][col] = getActivePlayer().value;
         }
 
-        switchPlayerTurn();
-        gameBoard.checkWinner();
+        if(this.checkRows() || this.checkColumns() || this.checkDiagonals()){
+            console.log(`Winner is ${getActivePlayer().name}!!`);
+            gameBoard.renderBoard();
+            gameBoard.resetBoard();
+            board = gameBoard.getBoard();
+            return;
+        }
+        else if(gameBoard.isBoardFull()){
+            console.log(`This is a Draw!!`);
+            gameBoard.renderBoard();
+            gameBoard.resetBoard();
+            board = gameBoard.getBoard();
+            return;
+        }
         gameBoard.renderBoard();
+        switchPlayerTurn();
+        
     }
 
-    return { playTurn, getActivePlayer, start: gameBoard.startGame }
+    function checkRows() {
+        const board = gameBoard.getBoard();
+        const value = this.getActivePlayer().value;
+        for(let row=0; row<3; row++){
+            const rowArr = board[row];
+            // console.log(rowArr);
+            if(rowArr.every((field) => field === value))
+                return true;
+        }
+        return false;
+    }
+    function checkColumns() {
+        const board = gameBoard.getBoard();
+        const value = this.getActivePlayer().value;
+        for(let col=0; col<3; col++){
+            const colArr = [];
+            for(let row=0; row<3; row++)
+                colArr.push(board[row][col]);
+            // console.log(colArr);
+            if(colArr.every((field) => field === value))
+                return true;
+        }
+        return false;
+    }
+    function checkDiagonals(){
+        const board = gameBoard.getBoard();
+        const value = this.getActivePlayer().value;
+        const leftDiagonal = [board[0][0], board[1][1], board[2][2]];
+        const rightDiagonal = [board[0][2], board[1][1], board[2][0]];
+        if(leftDiagonal.every((field) => field === value) ||
+           rightDiagonal.every((field) => field === value)
+           )
+           return true;
+        return false;
+    }
+
+    return {
+        playTurn, getActivePlayer, start: gameBoard.startGame, checkRows, checkColumns, checkDiagonals
+    };
 
 }
 
