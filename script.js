@@ -138,7 +138,49 @@ function GameController
 
 }
 
-const game = GameController("Hemant", "Aarav");
 
+
+function screenController() {
+    const game = GameController("Hemant", "Aarav");
+    const boardDiv = document.querySelector('.board');
+    const turnHeader = document.querySelector('.turn');
+    
+    const updateScreen = () => {
+        boardDiv.textContent = '';
+
+        const activePlayer = game.getActivePlayer();
+        const board = gameBoard.getBoard();
+        
+        turnHeader.textContent = `${activePlayer.name}'s Turn with symbol ${activePlayer.value}`;
+        
+        // let index = 0;
+        board.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+                const cellButton = document.createElement('button');
+                cellButton.classList.add('cell');
+                cellButton.dataset.column = colIndex;
+                cellButton.dataset.row = rowIndex;
+                cellButton.textContent = cell;
+                boardDiv.appendChild(cellButton);
+            });
+        });        
+    }
+
+    function handleBoardClick(e) {
+        const selectedRow = e.target.dataset.row;
+        const selectedCol = e.target.dataset.column;
+
+        if(!selectedRow || !selectedCol)
+            return;
+        
+        game.playTurn(selectedRow, selectedCol);
+        updateScreen();
+    }
+    boardDiv.addEventListener('click', handleBoardClick);
+    updateScreen();
+    
+}
+
+screenController();
 
 
