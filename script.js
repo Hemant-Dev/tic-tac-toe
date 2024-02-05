@@ -66,6 +66,9 @@ function GameController
 
     const getActivePlayer = () => activePlayer;
 
+    let winnerPlayer = '';
+    const getWinner = () => winnerPlayer;
+
     function playTurn(row, col) {
 
         console.log(`${getActivePlayer().name}'s turn.`)
@@ -79,13 +82,15 @@ function GameController
 
         if(this.checkRows() || this.checkColumns() || this.checkDiagonals()){
             console.log(`Winner is ${getActivePlayer().name}!!`);
+            winnerPlayer = getActivePlayer().name;
             gameBoard.renderBoard();
             gameBoard.resetBoard();
             board = gameBoard.getBoard();
             return;
         }
-        else if(gameBoard.isBoardFull()){
+        if(gameBoard.isBoardFull()){
             console.log(`This is a Draw!!`);
+            winnerPlayer = 'Draw';
             gameBoard.renderBoard();
             gameBoard.resetBoard();
             board = gameBoard.getBoard();
@@ -133,7 +138,8 @@ function GameController
     }
 
     return {
-        playTurn, getActivePlayer, start: gameBoard.startGame, checkRows, checkColumns, checkDiagonals
+        playTurn, getActivePlayer, start: gameBoard.startGame, checkRows, checkColumns, checkDiagonals,
+        getWinner
     };
 
 }
@@ -141,10 +147,14 @@ function GameController
 
 
 function screenController() {
-    const game = GameController("Hemant", "Aarav");
+    let game = GameController("Hemant", "Aarav");
     const boardDiv = document.querySelector('.board');
     const turnHeader = document.querySelector('.turn');
     
+    const replay = document.createElement('button');
+    replay.classList.add('replay-btn');
+    replay.textContent = 'Replay'; 
+
     const updateScreen = () => {
         boardDiv.textContent = '';
 
@@ -174,9 +184,23 @@ function screenController() {
             return;
         
         game.playTurn(selectedRow, selectedCol);
+        if(game.getWinner() !== ''){
+            boardDiv.textContent = '';
+            turnHeader.textContent = `Winner is ${game.getWinner()}`;
+            boardDiv.appendChild(replay);
+            return;
+        }
         updateScreen();
     }
+
+    function handleReplay() {
+        game = GameController("Hemant", "Aarav");
+        game.winnerPlayer = ''; //Resetting the winner
+        updateScreen();
+    }
+
     boardDiv.addEventListener('click', handleBoardClick);
+    replay.addEventListener('click', handleReplay);
     updateScreen();
     
 }
